@@ -139,17 +139,26 @@
 
 /* AI Summary */
 .ai-summary {
-  background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%);
-  border-left: 4px solid var(--accent);
+  background: #18222D;
+  border-radius: 1rem;
   padding: 1.5rem 2rem;
-  margin: 2rem 0;
+  margin: 2rem 0 1.5rem 0;
+  box-shadow: 0 2px 8px 0 rgba(29,233,182,0.08);
+  color: #F3F7FA;
+  font-size: 1.1rem;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
-
 .ai-summary h3 {
   color: var(--primary);
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0 0 1rem 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .ai-summary p {
@@ -177,11 +186,15 @@
 
 /* Article Actions */
 .article-actions {
+  background: #18222D;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px 0 rgba(29,233,182,0.08);
+  padding: 1.5rem 2rem;
+  margin-top: 2rem;
   display: flex;
-  gap: 1rem;
-  padding: 2rem;
-  border-top: 1px solid var(--border);
-  background: #F8FAFC;
+  gap: 1.5rem;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .action-icon {

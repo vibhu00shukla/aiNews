@@ -5,21 +5,31 @@ import Signup from './components/Signup';
 import Feed from './components/Feed';
 import ArticleDetail from './components/ArticleDetail';
 import Settings from './components/Settings';
+import PreferencesSetup from './components/PreferencesSetup';
 import './App.css';
 
 // Admin user credentials
 const ADMIN_EMAIL = 'vibhu00shukla@gmail.com';
 const ADMIN_PASSWORD = 'vibhu';
 
+const ALL_CATEGORIES = ['technology', 'business', 'science', 'health', 'entertainment', 'sports'];
+
 function App() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showPreferences, setShowPreferences] = useState(false);
 
   useEffect(() => {
     // Check for stored user data on app load
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const userData = JSON.parse(storedUser);
+      setUser(userData);
+      
+      // Check if user needs to set preferences (new users without preferences)
+      if (!userData.preferences || userData.preferences.length === 0) {
+        setShowPreferences(true);
+      }
     }
     setIsLoading(false);
   }, []);
@@ -34,6 +44,7 @@ function App() {
         preferences: ['technology', 'business', 'science', 'health', 'entertainment', 'sports']
       };
       setUser(adminUser);
+      setShowPreferences(false);
       localStorage.setItem('user', JSON.stringify(adminUser));
       return { success: true };
     }
@@ -47,6 +58,7 @@ function App() {
       preferences: ['technology', 'business']
     };
     setUser(regularUser);
+    setShowPreferences(false);
     localStorage.setItem('user', JSON.stringify(regularUser));
     return { success: true };
   };
@@ -58,21 +70,25 @@ function App() {
       email: email,
       name: name,
       isAdmin: false,
-      preferences: ['technology', 'business']
+      preferences: [] // Empty preferences to trigger setup
     };
     setUser(newUser);
+    setShowPreferences(true); // Show preferences setup for new users
     localStorage.setItem('user', JSON.stringify(newUser));
     return { success: true };
   };
 
   const logout = () => {
     setUser(null);
+    setShowPreferences(false);
     localStorage.removeItem('user');
   };
 
   const updateUserPreferences = (preferences) => {
-    const updatedUser = { ...user, preferences };
+    // If preferences is empty, set to all categories
+    const updatedUser = { ...user, preferences: preferences.length === 0 ? ALL_CATEGORIES : preferences };
     setUser(updatedUser);
+    setShowPreferences(false);
     localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
@@ -96,6 +112,8 @@ function App() {
     );
   }
 
+  // Remove direct rendering of PreferencesSetup here
+
   return (
     <Router>
       <div className="App">
@@ -110,19 +128,23 @@ function App() {
           />
           <Route 
             path="/feed" 
-            element={user ? <Feed user={user} onLogout={logout} /> : <Navigate to="/login" />} 
+            element={user ? (showPreferences ? <Navigate to="/preferences-setup" /> : <Feed user={user} onLogout={logout} />) : <Navigate to="/login" />} 
           />
           <Route 
             path="/article/:id" 
-            element={user ? <ArticleDetail user={user} onLogout={logout} /> : <Navigate to="/login" />} 
+            element={user ? (showPreferences ? <Navigate to="/preferences-setup" /> : <ArticleDetail user={user} onLogout={logout} />) : <Navigate to="/login" />} 
           />
           <Route 
             path="/settings" 
-            element={user ? <Settings user={user} onLogout={logout} onUpdatePreferences={updateUserPreferences} onUpdatePassword={updatePassword} /> : <Navigate to="/login" />} 
+            element={user ? (showPreferences ? <Navigate to="/preferences-setup" /> : <Settings user={user} onLogout={logout} onUpdatePreferences={updateUserPreferences} onUpdatePassword={updatePassword} />) : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/preferences-setup"
+            element={user ? <PreferencesSetup user={user} onUpdatePreferences={updateUserPreferences} /> : <Navigate to="/login" />} 
           />
           <Route 
             path="/" 
-            element={<Navigate to={user ? "/feed" : "/login"} />} 
+            element={<Navigate to={user ? (showPreferences ? "/preferences-setup" : "/feed") : "/login"} />} 
           />
         </Routes>
       </div>

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Settings, LogOut, User, Search, Filter } from 'lucide-react';
+import { Settings, LogOut, User, Search, Filter, Bookmark } from 'lucide-react';
 import './Feed.css';
 
 // Mock news data - replace with actual API calls
-const mockNewsData = [
+export const mockNewsData = [
   {
     id: 1,
     title: "AI Breakthrough: New Model Achieves Human-Level Understanding",
@@ -66,8 +66,19 @@ const Feed = ({ user, onLogout }) => {
   const [filteredNews, setFilteredNews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  // Load last selected filter from localStorage, else default
+  const getInitialCategory = () => {
+    const saved = localStorage.getItem('selectedCategory');
+    if (saved) return saved;
+    if (user.preferences && user.preferences.length > 0) return 'preferences';
+    return 'all';
+  };
+  const [selectedCategory, setSelectedCategory] = useState(getInitialCategory());
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [bookmarks, setBookmarks] = useState(() => {
+    const saved = localStorage.getItem(`bookmarks_${user.email}`);
+    return saved ? JSON.parse(saved) : [];
+  });
 
   useEffect(() => {
     // Simulate API call
@@ -81,9 +92,12 @@ const Feed = ({ user, onLogout }) => {
   useEffect(() => {
     let filtered = news;
 
-    // Filter by category
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(article => article.category === selectedCategory);
+    if (selectedCategory === 'bookmarks') {
+      filtered = news.filter(article => bookmarks.includes(article.id));
+    } else if (selectedCategory === 'preferences' && user.preferences && user.preferences.length > 0) {
+      filtered = news.filter(article => user.preferences.includes(article.category));
+    } else if (selectedCategory !== 'all') {
+      filtered = news.filter(article => article.category === selectedCategory);
     }
 
     // Filter by search term
@@ -95,7 +109,17 @@ const Feed = ({ user, onLogout }) => {
     }
 
     setFilteredNews(filtered);
-  }, [news, searchTerm, selectedCategory]);
+  }, [news, searchTerm, selectedCategory, user.preferences, bookmarks]);
+
+  // Save selected filter to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('selectedCategory', selectedCategory);
+  }, [selectedCategory]);
+
+  // Save bookmarks to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem(`bookmarks_${user.email}` , JSON.stringify(bookmarks));
+  }, [bookmarks, user.email]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -108,6 +132,8 @@ const Feed = ({ user, onLogout }) => {
   };
 
   const categories = [
+    { value: 'bookmarks', label: 'Bookmarks' },
+    { value: 'preferences', label: 'Your Preferences' },
     { value: 'all', label: 'All Categories' },
     { value: 'technology', label: 'Technology' },
     { value: 'business', label: 'Business' },
@@ -116,6 +142,14 @@ const Feed = ({ user, onLogout }) => {
     { value: 'entertainment', label: 'Entertainment' },
     { value: 'sports', label: 'Sports' }
   ];
+
+  const handleCategoryChange = (e) => {
+    setSelectedCategory(e.target.value);
+  };
+
+  // Expose bookmarks and setBookmarks for ArticleDetail
+  window.__setBookmarks = setBookmarks;
+  window.__bookmarks = bookmarks;
 
   if (isLoading) {
     return (
@@ -142,34 +176,56 @@ const Feed = ({ user, onLogout }) => {
                 <Search className="search-icon" />
                 <input
                   type="text"
-                  placeholder="Search news..."
+                  placeholder="     Search news..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="search-input"
                 />
               </div>
+              <button
+                className={`header-action-btn${selectedCategory === 'bookmarks' ? ' active' : ''}`}
+                title="Bookmarks"
+                onClick={() => setSelectedCategory('bookmarks')}
+                style={{ fontWeight: selectedCategory === 'bookmarks' ? 'bold' : 'normal' }}
+              >
+                <Bookmark className="action-icon" />
+              </button>
               
-              <div className="user-menu-container">
+              <div className="header-actions">
+                <Link to="/settings" className="header-action-btn" title="Settings">
+                  <Settings className="action-icon" />
+                </Link>
+                
                 <button
-                  className="user-menu-button"
-                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  onClick={onLogout}
+                  className="header-action-btn"
+                  title="Logout"
                 >
-                  <User className="user-icon" />
-                  <span>{user.name}</span>
+                  <LogOut className="action-icon" />
                 </button>
                 
-                {showUserMenu && (
-                  <div className="user-menu">
-                    <Link to="/settings" className="menu-item">
-                      <Settings className="menu-icon" />
-                      Settings
-                    </Link>
-                    <button onClick={onLogout} className="menu-item">
-                      <LogOut className="menu-icon" />
-                      Logout
-                    </button>
-                  </div>
-                )}
+                <div className="user-menu-container">
+                  <button
+                    className="user-menu-button"
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                  >
+                    <User className="user-icon" />
+                    <span>{user.name}</span>
+                  </button>
+                  
+                  {showUserMenu && (
+                    <div className="user-menu">
+                      <Link to="/settings" className="menu-item">
+                        <Settings className="menu-icon" />
+                        Settings
+                      </Link>
+                      <button onClick={onLogout} className="menu-item">
+                        <LogOut className="menu-icon" />
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -184,7 +240,7 @@ const Feed = ({ user, onLogout }) => {
             <Filter className="filter-icon" />
             <select
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              onChange={handleCategoryChange}
               className="category-select"
             >
               {categories.map(category => (

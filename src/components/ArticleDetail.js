@@ -68,7 +68,13 @@ const ArticleDetail = ({ user, onLogout }) => {
   const [article, setArticle] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  // Load bookmarks from localStorage
+  const [isBookmarked, setIsBookmarked] = useState(() => {
+    const saved = localStorage.getItem(`bookmarks_${user.email}`);
+    if (!saved) return false;
+    const arr = JSON.parse(saved);
+    return arr.includes(Number(id));
+  });
 
   useEffect(() => {
     // Simulate API call
@@ -80,6 +86,14 @@ const ArticleDetail = ({ user, onLogout }) => {
       setIsLoading(false);
     }, 1000);
   }, [id]);
+
+  // Sync isBookmarked with Feed bookmarks
+  useEffect(() => {
+    const saved = localStorage.getItem(`bookmarks_${user.email}`);
+    if (!saved) return setIsBookmarked(false);
+    const arr = JSON.parse(saved);
+    setIsBookmarked(arr.includes(Number(id)));
+  }, [id, user.email]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -104,6 +118,21 @@ const ArticleDetail = ({ user, onLogout }) => {
       navigator.clipboard.writeText(window.location.href);
       alert('Link copied to clipboard!');
     }
+  };
+
+  const handleBookmark = () => {
+    const saved = localStorage.getItem(`bookmarks_${user.email}`);
+    let arr = saved ? JSON.parse(saved) : [];
+    const articleId = Number(id);
+    if (arr.includes(articleId)) {
+      arr = arr.filter(bid => bid !== articleId);
+    } else {
+      arr.push(articleId);
+    }
+    localStorage.setItem(`bookmarks_${user.email}`, JSON.stringify(arr));
+    setIsBookmarked(arr.includes(articleId));
+    // Sync with Feed if open
+    if (window.__setBookmarks) window.__setBookmarks(arr);
   };
 
   if (isLoading) {
@@ -214,20 +243,11 @@ const ArticleDetail = ({ user, onLogout }) => {
 
             {/* Article Actions */}
             <div className="article-actions">
-              <button
-                onClick={handleShare}
-                className="btn btn-secondary"
-              >
-                <Share2 className="action-icon" />
-                Share Article
+              <button className="btn btn-secondary" onClick={handleShare}>
+                <Share2 style={{ marginRight: '0.5rem' }} /> Share Article
               </button>
-              
-              <button
-                onClick={() => setIsBookmarked(!isBookmarked)}
-                className={`btn ${isBookmarked ? 'btn-primary' : 'btn-secondary'}`}
-              >
-                <Bookmark className="action-icon" />
-                {isBookmarked ? 'Bookmarked' : 'Bookmark'}
+              <button className={`btn ${isBookmarked ? 'btn-primary' : 'btn-secondary'}`} onClick={handleBookmark}>
+                <Bookmark style={{ marginRight: '0.5rem' }} /> {isBookmarked ? 'Bookmarked' : 'Bookmark'}
               </button>
             </div>
           </article>

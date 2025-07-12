@@ -1,3 +1,57 @@
 /* Signup component uses the same styles as Login */
 /* Import Login styles */
-@import './Login.css'; 
+@import './Login.css';
+.signup-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background);
+  padding: 2rem 1rem;
+}
+.signup-card {
+  background: #18222D;
+  border-radius: 1.5rem;
+  box-shadow: var(--shadow);
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 420px;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.signup-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.signup-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+.signup-header p {
+  color: var(--text-light);
+  font-size: 1.1rem;
+}
+.signup-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.signup-footer {
+  text-align: center;
+  margin-top: 2rem;
+  color: var(--text-light);
+}
+.signup-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+.signup-link:hover {
+  text-decoration: underline;
+  color: var(--primary-dark);
+} 
