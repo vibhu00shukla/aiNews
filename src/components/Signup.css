@@ -1,0 +1,3 @@
+/* Signup component uses the same styles as Login */
+/* Import Login styles */
+@import './Login.css'; 
