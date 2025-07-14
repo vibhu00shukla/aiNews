@@ -1,6 +1,6 @@
 /* Signup component uses the same styles as Login */
 /* Import Login styles */
-@import './Login.css';
+@import './Login.css'; 
 .signup-container {
   min-height: 100vh;
   display: flex;

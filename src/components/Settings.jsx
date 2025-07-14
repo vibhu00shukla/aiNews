@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, User, Lock, LogOut, Save, Eye, EyeOff, ChevronDown, ChevronUp, Bookmark } from 'lucide-react';
 import './Settings.css';
-import { mockNewsData } from './Feed';
+import { mockNewsData } from './Feed.jsx';
 
 const Settings = ({ user, onLogout, onUpdatePreferences, onUpdatePassword }) => {
   const [selectedCategories, setSelectedCategories] = useState(user.preferences || []);
@@ -201,7 +201,7 @@ const Settings = ({ user, onLogout, onUpdatePreferences, onUpdatePassword }) => 
             {/* Change Password - Card Style */}
             <div className="settings-section change-password-card">
               <div className="change-password-header">
-                <Lock className="section-icon" />
+                  <Lock className="section-icon" />
                 Change Password
                 <button className="change-password-toggle" onClick={() => setShowPasswordSection(!showPasswordSection)}>
                   {showPasswordSection ? <ChevronUp /> : <ChevronDown />}

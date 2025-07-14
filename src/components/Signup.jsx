@@ -1,7 +1,16 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Check } from 'lucide-react';
 import './Signup.css';
+
+const categories = [
+  { value: 'technology', label: 'Technology', icon: '💻' },
+  { value: 'business', label: 'Business', icon: '💼' },
+  { value: 'science', label: 'Science', icon: '🔬' },
+  { value: 'health', label: 'Health', icon: '🏥' },
+  { value: 'entertainment', label: 'Entertainment', icon: '🎬' },
+  { value: 'sports', label: 'Sports', icon: '⚽' }
+];
 
 const Signup = ({ onSignup }) => {
   const [formData, setFormData] = useState({
@@ -14,6 +23,7 @@ const Signup = ({ onSignup }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
   const handleChange = (e) => {
     setFormData({
@@ -21,6 +31,16 @@ const Signup = ({ onSignup }) => {
       [e.target.name]: e.target.value
     });
     setError('');
+  };
+
+  const handleCategoryToggle = (category) => {
+    setSelectedCategories(prev => {
+      if (prev.includes(category)) {
+        return prev.filter(c => c !== category);
+      } else {
+        return [...prev, category];
+      }
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -42,8 +62,15 @@ const Signup = ({ onSignup }) => {
       return;
     }
 
+    // Validate at least one category
+    if (selectedCategories.length === 0) {
+      setError('Please select at least one category');
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const result = await onSignup(formData.email, formData.password, formData.name);
+      const result = await onSignup(formData.email, formData.password, formData.name, selectedCategories);
       if (!result.success) {
         setError(result.message || 'Signup failed. Please try again.');
       }
@@ -141,6 +168,24 @@ const Signup = ({ onSignup }) => {
               </button>
             </div>
           </div>
+          <div className="form-group">
+            <label>Choose your news categories</label>
+            <div className="categories-grid" style={{ marginTop: '0.5rem', marginBottom: '1rem' }}>
+              {categories.map(category => (
+                <button
+                  type="button"
+                  key={category.value}
+                  className={`category-option${selectedCategories.includes(category.value) ? ' selected' : ''}`}
+                  onClick={() => handleCategoryToggle(category.value)}
+                  style={{ minWidth: 120 }}
+                >
+                  <div className="category-icon">{category.icon}</div>
+                  <span className="category-label">{category.label}</span>
+                  {selectedCategories.includes(category.value) && <Check className="check-icon" />}
+                </button>
+              ))}
+            </div>
+          </div>
           <button
             type="submit"
             className="btn btn-primary auth-submit"
@@ -150,7 +195,7 @@ const Signup = ({ onSignup }) => {
           </button>
         </form>
         <div className="signup-footer">
-          Already have an account?{' '}
+            Already have an account?{' '}
           <a href="/login" className="signup-link">Sign in here</a>
         </div>
       </div>

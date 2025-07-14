@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './components/Login';
-import Signup from './components/Signup';
-import Feed from './components/Feed';
-import ArticleDetail from './components/ArticleDetail';
-import Settings from './components/Settings';
-import PreferencesSetup from './components/PreferencesSetup';
+import Login from './components/Login.jsx';
+import Signup from './components/Signup.jsx';
+import Feed from './components/Feed.jsx';
+import ArticleDetail from './components/ArticleDetail.jsx';
+import Settings from './components/Settings.jsx';
+import PreferencesSetup from './components/PreferencesSetup.jsx';
 import './App.css';
 
 // Admin user credentials
@@ -63,17 +63,17 @@ function App() {
     return { success: true };
   };
 
-  const signup = (email, password, name) => {
+  const signup = (email, password, name, preferences) => {
     // For regular users, you would typically make an API call here
     // For now, we'll simulate a successful signup
     const newUser = {
       email: email,
       name: name,
       isAdmin: false,
-      preferences: [] // Empty preferences to trigger setup
+      preferences: preferences && preferences.length > 0 ? preferences : []
     };
     setUser(newUser);
-    setShowPreferences(true); // Show preferences setup for new users
+    setShowPreferences(false); // No need to show preferences setup
     localStorage.setItem('user', JSON.stringify(newUser));
     return { success: true };
   };
